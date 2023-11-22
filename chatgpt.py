@@ -1,28 +1,6 @@
-from models.fifteen_puzzle_model import Coordinate
-from scipy.spatial.distance import cityblock
-import math
-import random
 import heapq
 import copy
 
-def get_empty_square(board: list[list[int or None]]) -> Coordinate:
-  for idx, row in enumerate(board):
-      for jdx, value in enumerate(row):
-        if value == 0:
-          return Coordinate(x=jdx, y=idx)
-  
-def get_is_solvable(board: list[list[int or None]], empty_square: Coordinate) -> bool:
-  board = [item for sublist in board for item in sublist]
-  inversions = 0
-  for idx, value in enumerate(board):
-    if value is not None:
-      for jdx in range(idx + 1, len(board)):
-        if board[jdx] is not None and board[jdx] < value:
-          inversions += 1
-  is_position_even = abs(empty_square.y - 4) % 2 == 0
-  is_inversions_even = inversions % 2 == 0
-  
-  return is_position_even != is_inversions_even
 class PuzzleNode:
   def __init__(self, puzzle, parent=None, move=""):
     self.puzzle = puzzle
@@ -31,7 +9,7 @@ class PuzzleNode:
     self.cost = 0  # g(n)
     self.heuristic = 0  # h(n)
     self.calculate_cost()
-  
+
   def calculate_cost(self):
     # Calculate the cost (g(n)) and heuristic (h(n))
     if self.parent:
@@ -46,6 +24,7 @@ class PuzzleNode:
         if self.puzzle[i][j] != 0:
           row, col = divmod(self.puzzle[i][j] - 1, 4)
           total_distance += abs(i - row) + abs(j - col)
+    print(total_distance)
     return total_distance
 
   def __lt__(self, other):
@@ -82,29 +61,30 @@ def get_neighbors(node):
 
   return neighbors
 
-def get_solution_path(solution_node):
+def print_solution(solution_node):
   # Print the solution path
   path = []
   while solution_node:
-    path.append(solution_node.puzzle)
+    path.append(solution_node.move)
     solution_node = solution_node.parent
   path.reverse()
-  return path
+  print("Solution Path:")
+  print(" -> ".join(path))
 
-def solve_15_puzzle(initial_state: list[list[int]]):
+def solve_15_puzzle(initial_state):
   # A* algorithm to solve the 15 Puzzle problem
   start_node = PuzzleNode(initial_state)
   goal_state = PuzzleNode([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 0]])
 
   visited = set()
   priority_queue = [start_node]
-  solution_path = []
+
   while priority_queue:
     current_node = heapq.heappop(priority_queue)
 
     if current_node.puzzle == goal_state.puzzle:
-      solution_path = get_solution_path(current_node)
-      print(solution_path)
+      print("Puzzle Solved!")
+      print_solution(current_node)
       break
 
     visited.add(tuple(map(tuple, current_node.puzzle)))
@@ -113,29 +93,14 @@ def solve_15_puzzle(initial_state: list[list[int]]):
     for neighbor in neighbors:
       if tuple(map(tuple, neighbor.puzzle)) not in visited:
         heapq.heappush(priority_queue, neighbor)
-  print(solution_path)
-  return solution_path
 
-def get_random_board() -> list[list[int or None]]:
-  board = list(range(0, 16))
-  random.shuffle(board)
-  return [board[0:4], board[4:8], board[8:12], board[12:16]]
-
-def evaluate_puzzle(board: list[list[int or None]]) -> int:
-  accumulated = 0
-  for idx, row in enumerate(board):
-    for jdx, value in enumerate(row):
-      if value is not None:
-        ideal_linear_value = (value - 1)
-        ideal_row = math.trunc(ideal_linear_value / 4)
-        ideal_column = ideal_linear_value % 4
-        accumulated += cityblock([idx, jdx], [ideal_row, ideal_column])
-  return abs((accumulated * 2) - 100)
-
-def solve_puzzle(board):
-  empty_square = get_empty_square(board)
-  is_solvable = get_is_solvable(board, empty_square)
-  solution_moves: list[list[int]] = []
-  if is_solvable:
-    solution_moves = solve_15_puzzle(board)
-  return dict(solution_found=is_solvable, moves=solution_moves)
+if __name__ == "__main__":
+  # Example usage:
+  initial_state = [
+      [1, 2, 3, 4],
+      [5, 6, 0, 8],
+      [9, 10, 7, 12],
+      [13, 14, 11, 15]
+  ]
+  print(initial_state)
+  solve_15_puzzle(initial_state)

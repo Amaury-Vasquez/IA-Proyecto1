@@ -1,26 +1,32 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 class Coordinate(BaseModel):
   x: int
   y: int
   
+  __eq__ = lambda self, other: self.x == other.x and self.y == other.y
+  
 class SolutionItem(BaseModel):
   start: Coordinate
   end: Coordinate
+  value: int
   evaluation: int
+  
+  __eq__ = lambda self, other: self.start == other.start and self.end == other.end and self.value == other.value and self.evaluation == other.evaluation
   
 class FifteenPuzzleBoard(BaseModel):
-  board: list[list[Optional[int]]]
+  board: List[List[int]] = [
+    [1, 2, 3, 4], 
+    [5, 6, 7, 8],
+    [9, 10, 11, 12],
+    [13, 14, 0, 15]
+  ]
 
-class FifteenPuzzleEvaluation(BaseModel):
-  evaluation: int
-  
 class FifteenPuzzleSolution(BaseModel):
-  moves: list[SolutionItem]
+  moves: List[List[List[int]]]
   solution_found: bool
-  iterations: int
 
 class FifteenPuzzleSolutionRequest(FifteenPuzzleBoard):
-  emptySquare: Coordinate
+  emptySquare: Coordinate = Coordinate(x=2, y=3)
   

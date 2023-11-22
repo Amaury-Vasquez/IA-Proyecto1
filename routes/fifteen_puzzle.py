@@ -1,30 +1,31 @@
 from fastapi import APIRouter
 from models.fifteen_puzzle_model import *
-from solutions.fifteen_puzzle_solution import evaluate_puzzle, solve_puzzle
-
-# mockBoard = [
-#   [15, 14, 13, 12],
-#   [11, 10, 9, 8],
-#   [None, 6, 5, 7],
-#   [4, 3, 2, 1]
-# ]
-solvedBoard = [
-  [1, 2, 3, 4],
-  [5, 6, 7, 8],
-  [9, 10, 11, 12],
-  [13, 14, 15, None]
-]
+from solutions.fifteen_puzzle_solution import get_empty_square, evaluate_puzzle, solve_puzzle, get_random_board, get_is_solvable
 
 puzzle_router = APIRouter(tags=["fifteen-puzzle"], prefix="/fifteen-puzzle")
 
-@puzzle_router.post("/evaluate", response_model=FifteenPuzzleEvaluation)
+@puzzle_router.get("/board", response_model=FifteenPuzzleBoard)
+def get_board():
+  is_solvable = False
+  board = []
+  while not is_solvable:
+    board = get_random_board()
+    empty_square = get_empty_square(board)
+    is_solvable = get_is_solvable(board, empty_square)
+    
+  return {"board": board}
+
+@puzzle_router.post("/evaluate", response_model=int)
 def evaluate(data: FifteenPuzzleBoard):
-  return {
-    "evaluation": evaluate_puzzle(data.board)
-  }
+  try:
+    return evaluate_puzzle(data.board)
+  except Exception as e:
+    print(e)
 
 @puzzle_router.post("/solve", response_model=FifteenPuzzleSolution)
-def solve(data: FifteenPuzzleSolutionRequest):
-  emptySquare = Coordinate(x = 3, y = 3)
-  solution_moves = solve_puzzle(solvedBoard, emptySquare)
-  return solution_moves
+def solve(data: FifteenPuzzleBoard):
+  try:
+    solution = solve_puzzle(data.board)
+    return {"solution_found": solution["solution_found"], "moves": solution["moves"]}
+  except Exception as e:
+    print(e)
