@@ -83,7 +83,6 @@ def get_neighbors(node):
   return neighbors
 
 def get_solution_path(solution_node):
-  # Print the solution path
   path = []
   while solution_node:
     path.append(solution_node.puzzle)
@@ -104,7 +103,6 @@ def solve_15_puzzle(initial_state: list[list[int]]):
 
     if current_node.puzzle == goal_state.puzzle:
       solution_path = get_solution_path(current_node)
-      print(solution_path)
       break
 
     visited.add(tuple(map(tuple, current_node.puzzle)))
@@ -113,7 +111,6 @@ def solve_15_puzzle(initial_state: list[list[int]]):
     for neighbor in neighbors:
       if tuple(map(tuple, neighbor.puzzle)) not in visited:
         heapq.heappush(priority_queue, neighbor)
-  print(solution_path)
   return solution_path
 
 def get_random_board() -> list[list[int or None]]:
