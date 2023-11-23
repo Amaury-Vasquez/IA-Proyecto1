@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from models.fifteen_puzzle_model import *
-from solutions.fifteen_puzzle_solution import get_empty_square, evaluate_puzzle, solve_puzzle, get_random_board, get_is_solvable
+from solutions.fifteen_puzzle_solution import evaluate_puzzle, solve_puzzle, get_random_board, get_is_solvable
 
 puzzle_router = APIRouter(tags=["fifteen-puzzle"], prefix="/fifteen-puzzle")
 
@@ -10,8 +10,7 @@ def get_board():
   board = []
   while not is_solvable:
     board = get_random_board()
-    empty_square = get_empty_square(board)
-    is_solvable = get_is_solvable(board, empty_square)
+    is_solvable = get_is_solvable(board)
     
   return {"board": board}
 

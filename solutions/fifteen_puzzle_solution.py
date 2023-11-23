@@ -10,19 +10,24 @@ def get_empty_square(board: list[list[int or None]]) -> Coordinate:
       for jdx, value in enumerate(row):
         if value == 0:
           return Coordinate(x=jdx, y=idx)
-  
-def get_is_solvable(board: list[list[int or None]], empty_square: Coordinate) -> bool:
-  board = [item for sublist in board for item in sublist]
+
+def get_is_solvable(puzzle):
+  # Aplanar la lista
+  flattened = [num for row in puzzle for num in row]
+    
+  # Encontrar la posición del espacio en blanco (representado por 0)
+  blank_row = next(i for i, x in enumerate(puzzle) if 0 in x)
+
+  # Contar inversiones
   inversions = 0
-  for idx, value in enumerate(board):
-    if value is not None:
-      for jdx in range(idx + 1, len(board)):
-        if board[jdx] is not None and board[jdx] < value:
-          inversions += 1
-  is_position_even = abs(empty_square.y - 4) % 2 == 0
-  is_inversions_even = inversions % 2 == 0
-  
-  return is_position_even != is_inversions_even
+  for i in range(len(flattened)):
+    for j in range(i + 1, len(flattened)):
+      if flattened[i] > flattened[j] and flattened[i] != 0 and flattened[j] != 0:
+        inversions += 1
+
+  # Verificar si la paridad de la permutación y la posición del espacio en blanco son ambas pares o ambas impares
+  return (inversions % 2 == 0) == (blank_row % 2 != 0)
+
 class PuzzleNode:
   def __init__(self, puzzle, parent=None, move=""):
     self.puzzle = puzzle
@@ -120,18 +125,17 @@ def get_random_board() -> list[list[int or None]]:
 
 def evaluate_puzzle(board: list[list[int or None]]) -> int:
   accumulated = 0
+
   for idx, row in enumerate(board):
     for jdx, value in enumerate(row):
-      if value is not None:
+      if value != 0:
         ideal_linear_value = (value - 1)
-        ideal_row = math.trunc(ideal_linear_value / 4)
-        ideal_column = ideal_linear_value % 4
+        ideal_row, ideal_column = divmod(ideal_linear_value, 4)
         accumulated += cityblock([idx, jdx], [ideal_row, ideal_column])
   return abs((accumulated * 2) - 100)
 
 def solve_puzzle(board):
-  empty_square = get_empty_square(board)
-  is_solvable = get_is_solvable(board, empty_square)
+  is_solvable = get_is_solvable(board)
   solution_moves: list[list[int]] = []
   if is_solvable:
     solution_moves = solve_15_puzzle(board)

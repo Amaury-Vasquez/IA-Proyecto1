@@ -17,7 +17,3 @@ app.add_middleware(
 
 # Including routes
 app.include_router(puzzle_router)
-
-@app.get("/")
-def root():
-  return {"message": "Hello World"}
