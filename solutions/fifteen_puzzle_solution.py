@@ -1,6 +1,5 @@
 from models.fifteen_puzzle_model import Coordinate
 from scipy.spatial.distance import cityblock
-import math
 import random
 import heapq
 import copy
