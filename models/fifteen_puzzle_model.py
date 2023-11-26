@@ -4,7 +4,7 @@ from typing import Optional, List
 class Coordinate(BaseModel):
   x: int
   y: int
-  
+
   __eq__ = lambda self, other: self.x == other.x and self.y == other.y
   
 class SolutionItem(BaseModel):
